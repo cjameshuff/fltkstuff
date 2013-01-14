@@ -22,7 +22,50 @@
 using namespace std;
 using boost::format;
 
+class DiffWindow;
+
 GL_GraphicsDriver * glGraphicsDriver = nullptr;
+DiffWindow * diffWindow = nullptr;
+
+
+class DiffWindow: public flu::Window {
+    uint8_t * imageA;
+    uint8_t * imageB;
+  public:
+    DiffWindow(int wx, int wy, int ww, int wh, const char * label = nullptr):
+        flu::Window(wx, wy, ww, wh, label),
+        imageA(nullptr),
+        imageB(nullptr)
+    {}
+    
+    void set_image_a(uint8_t * img) {
+        if(imageA) delete[] imageA;
+        imageA = img;
+        redraw();
+    }
+    void set_image_b(uint8_t * img) {
+        if(imageB) delete[] imageB;
+        imageB = img;
+        redraw();
+    }
+    
+    void draw() {
+        size_t n = 3*w()*h();
+        std::vector<uint8_t> buf(n, 0);
+        if(imageA && imageB) {
+            cerr << "Have images, computing difference" << endl;
+            for(size_t x = 0; x < w(); ++x)
+            for(size_t y = 0; y < h(); ++y)
+            for(size_t c = 0; c < 3; ++c)
+            {
+                int a = imageA[3*((h() - 1 - y)*w() + x) + c];
+                int b = imageB[3*(y*w() + x) + c];
+                buf[3*(y*w() + x) + c] = min(255, abs(a - b));
+            }
+        }
+        fltk3::draw_image(&buf[0], 0, 0, w(), h(), 3, 0);
+    }
+};
 
 class Sketch: public flu::Widget {
     std::function<void()> drawFn;
@@ -97,7 +140,37 @@ void GLView::draw()
     redraw();
     draw_children();
     glGraphicsDriver->uninstall();
+    
+    size_t n = 4*w()*h();
+    uint8_t * buf = new uint8_t[n];
+    glReadPixels(0, 0, w(), h(), GL_RGB, GL_UNSIGNED_BYTE, buf);
+    diffWindow->set_image_a(buf);
 }
+
+
+
+class CaptureWindow: public flu::Window {
+  public:
+    CaptureWindow(int wx, int wy, int ww, int wh, const char * label = nullptr):
+        flu::Window(wx, wy, ww, wh, label)
+    {}
+    
+    void draw() {
+        // fltk3::Offscreen offscreen = fl_create_offscreen(w(), h());
+        // fl_begin_offscreen(offscreen);
+        redraw();
+        flu::Window::draw();
+        size_t n = 4*w()*h();
+        uint8_t * buf = new uint8_t[n];
+        
+        fltk3::read_image(buf, 0, 0, w(), h(), 0);
+        diffWindow->set_image_b(buf);
+        // fl_end_offscreen();
+        // fl_delete_offscreen(offscreen);
+        // make_current();
+    }
+};
+
 
 
 const int kButtonH = 20;
@@ -117,8 +190,8 @@ void PopulateWindow(fltk3::Window * win)
     box->labelfont(fltk3::BOLD + fltk3::ITALIC);
     box->labelsize(36);
     box->labeltype(fltk3::SHADOW_LABEL);
-    box->on_enter([]() -> int {cout << "Enter!" << endl; return 1;});
-    box->on_leave([]() -> int {cout << "Exit!" << endl; return 1;});
+    // box->on_enter([]() -> int {cout << "Enter!" << endl; return 1;});
+    // box->on_leave([]() -> int {cout << "Exit!" << endl; return 1;});
     y += h + ym;
     
     flu::Button * consoleBtn = new flu::Button(x, y, w, kButtonH, "Show console");
@@ -190,8 +263,11 @@ int main(int argc, char * argv[])
     
     // UI_Controller ui;
     // bool fullscreen = false;
+    diffWindow = new DiffWindow(1024+64, 0, 512, 720);
+    diffWindow->end();
+    diffWindow->show();
     
-    flu::Window * window = new flu::Window(50, 50, 1024, 720);
+    // flu::Window * window = new flu::Window(50, 250, 1024, 720);
     // window->callback([&ui] {
     //     if(fltk3::event() == fltk3::SHORTCUT && fltk3::event_key() == fltk3::EscapeKey)
     //     {
@@ -202,14 +278,16 @@ int main(int argc, char * argv[])
     // });
     
     
-    GLView * glView = new GLView(0, 0, 512, 720);
+    GLView * glView = new GLView(0+64, 0, 512, 720);
     glView->begin();
     PopulateWindow(glView);
+    glView->show();
     
-    flu::Window * standardView = new flu::Window(512, 0, 512, 720);
+    flu::Window * standardView = new CaptureWindow(512+64, 0, 512, 720);
     PopulateWindow(standardView);
+    standardView->show();
     
-    window->show(argc, argv);
+    // window->show(argc, argv);
     
     return fltk3::run();
 }
