@@ -324,7 +324,6 @@ void PopulateWindow(fltk3::Window * win)
     });
     
     win->end();
-    win->resizable(win);
 }
 
 int main(int argc, char * argv[])
