@@ -172,8 +172,6 @@ class CaptureWindow: public flu::Window {
     {}
     
     void draw() {
-        // fltk3::Offscreen offscreen = fl_create_offscreen(w(), h());
-        // fl_begin_offscreen(offscreen);
         redraw();
         flu::Window::draw();
         size_t n = 4*w()*h();
@@ -181,9 +179,6 @@ class CaptureWindow: public flu::Window {
         
         fltk3::read_image(buf, 0, 0, w(), h(), 0);
         diffWindow->set_image_b(buf);
-        // fl_end_offscreen();
-        // fl_delete_offscreen(offscreen);
-        // make_current();
     }
 };
 
@@ -297,6 +292,15 @@ void PopulateWindow(fltk3::Window * win)
         x += 30;
         fltk3::pie(x + 2, y + 2, 16, 16, 0, 270);
         fltk3::pie(80, 80, 80, 80, 0, 270);
+        
+        x = 20;
+        y += 40;
+        for(int j = 0, n = 16; j < n; ++j) {
+            double th = (2.0*M_PI*j)/n;
+            double c = cos(th), s = sin(th);
+            fltk3::line(x + 20 + c*8, y + 20 + s*8, x + 20 + c*16, y + 20 + s*16);
+        }
+        
         
         // fltk3::begin_points();
         // fltk3::begin_line();
