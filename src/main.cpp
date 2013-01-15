@@ -56,11 +56,18 @@ class DiffWindow: public flu::Window {
             cerr << "Have images, computing difference" << endl;
             for(size_t x = 0; x < w(); ++x)
             for(size_t y = 0; y < h(); ++y)
-            for(size_t c = 0; c < 3; ++c)
             {
-                int a = imageA[3*((h() - 1 - y)*w() + x) + c];
-                int b = imageB[3*(y*w() + x) + c];
-                buf[3*(y*w() + x) + c] = min(255, abs(a - b));
+                // for(size_t c = 0; c < 3; ++c)
+                // {
+                //     int a = imageA[3*((h() - 1 - y)*w() + x) + c];
+                //     int b = imageB[3*(y*w() + x) + c];
+                //     buf[3*(y*w() + x) + c] = min(255, abs(a - b));
+                // }
+                int a = imageA[3*((h() - 1 - y)*w() + x) + 0];
+                int b = imageB[3*(y*w() + x) + 0];
+                buf[3*(y*w() + x) + 0] = a;
+                buf[3*(y*w() + x) + 1] = b;
+                buf[3*(y*w() + x) + 2] = 255;
             }
         }
         fltk3::draw_image(&buf[0], 0, 0, w(), h(), 3, 0);
@@ -110,7 +117,8 @@ void GLView::InitGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     
-    glClearColor(0.0, 0.0, 0.5, 1.0);
+    // glClearColor(0.0, 0.0, 0.5, 1.0);
+    glClearColor(0.75, 0.75, 0.75, 1.0);
 }
 
 void GLView::draw()
@@ -129,8 +137,6 @@ void GLView::draw()
     
     // cout << "GLView::draw()" << endl;
     
-    // fltk3::GraphicsDriver * drv = fltk3::DisplayDevice::surface()->driver();
-    // fltk3::DisplayDevice::surface()->driver(glGraphicsDriver);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, w(), 0, h(), -1, 1);
@@ -243,6 +249,54 @@ void PopulateWindow(fltk3::Window * win)
         
         x += 20;
         fltk3::yxline(x + 3, y, y + 16, x + 7, y);
+        
+        x += 20;
+        fltk3::line(x, y, x + 6, y + 6);
+        fltk3::line(x + 16, y, x + 16 - 6, y + 6);
+        fltk3::line(x, y + 16, x + 6, y + 16 - 6);
+        fltk3::line(x + 16, y + 16, x + 16 - 6, y + 16 - 6);
+        
+        // fltk3::draw(const char * str, int n, int x, int y);
+        // fltk3::draw(int angle, const char * str, int n, int x, int y);
+        // fltk3::rtl_draw(const char * str, int n, int x, int y);
+        
+        x += 20;
+        fltk3::point(x + 6, y + 6);
+        fltk3::point(x + 14, y + 6);
+        fltk3::point(x + 14, y + 14);
+        fltk3::point(x + 6, y + 14);
+        
+        x += 20;
+        fltk3::loop(x + 6, y + 6, x + 14, y + 6, x + 14, y + 14);
+        
+        x += 20;
+        fltk3::loop(x + 6, y + 6, x + 14, y + 6, x + 14, y + 14, x + 6, y + 14);
+        
+        x += 20;
+        fltk3::polygon(x + 6, y + 6, x + 14, y + 6, x + 14, y + 14);
+        
+        x += 20;
+        fltk3::polygon(x + 6, y + 6, x + 14, y + 6, x + 14, y + 14, x + 6, y + 14);
+        
+        x += 20;
+        fltk3::circle(x + 10, y + 10, 8);
+        
+        x += 20;
+        fltk3::arc(x + 2, y + 2, 16, 16, 0, 270);
+        
+        x += 30;
+        fltk3::pie(x + 2, y + 2, 16, 16, 0, 270);
+        
+        // fltk3::begin_points();
+        // fltk3::begin_line();
+        // fltk3::begin_loop();
+        // fltk3::begin_polygon();
+        
+        // fltk3::begin_complex_polygon();
+        // fltk3::curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3);
+        // fltk3::arc(double x, double y, double r, double start, double end);
+        
+        // TODO: Clipping, images, text...
         cerr << "====================================================" << endl;
     });
     
