@@ -1,3 +1,12 @@
+// Notes:
+// Several parts of the OpenGL context are touched by this driver:
+// The modelview and projection matrices are overwritten.
+// GL_MULTISAMPLE is initially turned off and controlled by line width, being
+// enabled briefly for each solid shape drawn.
+// Line width and stipple pattern are changed.
+
+// arc(int x, int y, int w, int h, double a1, double a2)
+// gives slightly different results from the native Quartz renderer on my Mac.
 
 #include "GL_GraphicsDriver.h"
 #include "fltk3gl/gl.h"
@@ -22,6 +31,34 @@ GL_GraphicsDriver::GL_GraphicsDriver(): fltk3::GraphicsDriver()
 GL_GraphicsDriver::~GL_GraphicsDriver()
 {
     
+}
+
+void GL_GraphicsDriver::install(int vw, int vh) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, vw, 0, vh, -1, 1);
+    
+    lineWidth = 1;
+    glDisable(GL_MULTISAMPLE);
+    
+    viewW = vw;
+    viewH = vh;
+    replacedDriver = fltk3::DisplayDevice::display_device()->driver();
+    fltk3::DisplayDevice::display_device()->driver(this);
+    fltk3::DisplayDevice::display_device()->set_current();
+}
+
+void GL_GraphicsDriver::reinstall() {
+    replacedDriver = fltk3::DisplayDevice::display_device()->driver();
+    fltk3::DisplayDevice::display_device()->driver(this);
+    fltk3::DisplayDevice::display_device()->set_current();
+}
+
+void GL_GraphicsDriver::uninstall() {
+    fltk3::DisplayDevice::display_device()->driver(replacedDriver);
+    fltk3::DisplayDevice::display_device()->set_current();
 }
 
 void GL_GraphicsDriver::gl_vertex(double x, double y)
@@ -74,14 +111,28 @@ void GL_GraphicsDriver::line_style(int style, int width, char * dashes) {
         default: glDisable(GL_LINE_STIPPLE); break;
     }
     
-    width = max(1, width);
-    glLineWidth(width);
+    lineWidth = max(1, width);
+    glLineWidth(lineWidth);
+    
+    if(lineWidth < 1.5)
+        glDisable(GL_MULTISAMPLE);
+    else
+        glEnable(GL_MULTISAMPLE);
     
     LOG_UNIMPLEMENTED("()");
 }
 
+void GL_GraphicsDriver::StartSolid() {
+    if(lineWidth < 1.5)
+        glEnable(GL_MULTISAMPLE);
+}
+void GL_GraphicsDriver::EndSolid() {
+    if(lineWidth < 1.5)
+        glDisable(GL_MULTISAMPLE);
+}
 
-void GL_GraphicsDriver::RectVertices(int x, int y, int w, int h)
+
+void GL_GraphicsDriver::RectVertices(double x, double y, double w, double h)
 {
     if(w < 0) {
         w = -w;
@@ -91,10 +142,10 @@ void GL_GraphicsDriver::RectVertices(int x, int y, int w, int h)
         h = -h;
         y -= h;
     }
-    int x0 = x + origin_x();
-    int y0 = y + origin_y();
-    int x1 = x0 + w;
-    int y1 = y0 + h;
+    double x0 = x + origin_x();
+    double y0 = y + origin_y();
+    double x1 = x0 + w;
+    double y1 = y0 + h;
     gl_vertex(x0, y0);
     gl_vertex(x0, y1);
     gl_vertex(x1, y1);
@@ -109,9 +160,12 @@ void GL_GraphicsDriver::rect(int x, int y, int w, int h) {
     LOG("()");
 }
 void GL_GraphicsDriver::rectf(int x, int y, int w, int h) {
+    StartSolid();
     glBegin(GL_POLYGON);
-    RectVertices(x, y, w, h);
+    // Note offset, required for clear drawing/pixel alignment
+    RectVertices(x - 0.5, y - 0.5, w, h);
     glEnd();
+    EndSolid();
     LOG("()");
 }
 
@@ -201,6 +255,7 @@ void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2, int y3) {
 
 void GL_GraphicsDriver::line(int x, int y, int x1, int y1) {
     int ox = origin_x(), oy = origin_y();
+    
     glBegin(GL_LINES);
     gl_vertex(ox + x, oy + y);
     gl_vertex(ox + x1, oy + y1);
@@ -278,21 +333,25 @@ void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2, int
 
 void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2) {
     int ox = origin_x(), oy = origin_y();
+    StartSolid();
     glBegin(GL_TRIANGLES);
     gl_vertex(ox + x0, oy + y0);
     gl_vertex(ox + x1, oy + y1);
     gl_vertex(ox + x2, oy + y2);
     glEnd();
+    EndSolid();
     LOG("()");
 }
 void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3) {
     int ox = origin_x(), oy = origin_y();
+    StartSolid();
     glBegin(GL_QUADS);
     gl_vertex(ox + x0, oy + y0);
     gl_vertex(ox + x1, oy + y1);
     gl_vertex(ox + x2, oy + y2);
     gl_vertex(ox + x3, oy + y3);
     glEnd();
+    EndSolid();
     LOG("()");
 }
 
@@ -325,22 +384,24 @@ void GL_GraphicsDriver::end_loop() {
 }
 
 void GL_GraphicsDriver::begin_polygon() {
+    StartSolid();
     glBegin(GL_POLYGON);
     LOG("()");
 }
 void GL_GraphicsDriver::end_polygon() {
     glEnd();
+    EndSolid();
     LOG("()");
 }
 
 void GL_GraphicsDriver::circle(double x, double y, double r) {
-    x += origin_x();
-    y += origin_y();
     int n = min(360.0, M_PI*r);
+    double cx = x + origin_x();
+    double cy = y + origin_y();
     glBegin(GL_LINE_LOOP);
     for(int j = 0; j < n; ++j) {
         double th = (2.0*M_PI*j)/n;
-        gl_vertex(x + cos(th)*r, y + sin(th)*r);
+        gl_vertex(cx + cos(th)*r, cy + sin(th)*r);
     }
     glEnd();
     LOG("()");
@@ -349,12 +410,12 @@ void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {
     int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
     double xr = w/2.0;
     double yr = h/2.0;
-    x += origin_x() + xr;
-    y += origin_y() + yr;
+    double cx = x + origin_x() + xr;
+    double cy = y + origin_y() + yr;
     glBegin(GL_LINE_STRIP);
     for(int j = 0; j < n; ++j) {
         double th = (2.0*M_PI/360.0)*(((double)j/(n-1))*(a2 - a1) + a1);
-        gl_vertex(x + cos(th)*xr, y - sin(th)*yr);
+        gl_vertex(cx + cos(th)*xr, cy - sin(th)*yr);
     }
     glEnd();
     LOG("()");
@@ -363,15 +424,18 @@ void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
     int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
     double xr = w/2.0;
     double yr = h/2.0;
-    x += origin_x() + xr;
-    y += origin_y() + yr;
+    // Note offset, required for clear drawing/pixel alignment
+    double cx = x + origin_x() + xr - 0.5;
+    double cy = y + origin_y() + yr - 0.5;
+    StartSolid();
     glBegin(GL_TRIANGLE_FAN);
-    gl_vertex(x, y);
+    gl_vertex(cx, cy);
     for(int j = 0; j < n; ++j) {
         double th = (2.0*M_PI/360.0)*(((double)j/(n-1))*(a2 - a1) + a1);
-        gl_vertex(x + cos(th)*xr, y - sin(th)*yr);
+        gl_vertex(cx + cos(th)*xr, cy - sin(th)*yr);
     }
     glEnd();
+    EndSolid();
     LOG("()");
 }
 

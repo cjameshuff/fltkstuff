@@ -12,9 +12,13 @@
 class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     fltk3::GraphicsDriver * replacedDriver;
     int viewW, viewH;
+    double lineWidth;
     
   protected:
-    void RectVertices(int x, int y, int w, int h);
+    void RectVertices(double x, double y, double w, double h);
+    
+    void StartSolid();
+    void EndSolid();
     
     double to_gl_x(double x) {return x + 0.5;}
     double to_gl_y(double y) {return viewH - 0.5 - y;}
@@ -25,22 +29,9 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     GL_GraphicsDriver();
     virtual ~GL_GraphicsDriver();
     
-    void install(int vw, int vh) {
-        viewW = vw;
-        viewH = vh;
-        replacedDriver = fltk3::DisplayDevice::display_device()->driver();
-        fltk3::DisplayDevice::display_device()->driver(this);
-        fltk3::DisplayDevice::display_device()->set_current();
-    }
-    void reinstall() {
-        replacedDriver = fltk3::DisplayDevice::display_device()->driver();
-        fltk3::DisplayDevice::display_device()->driver(this);
-        fltk3::DisplayDevice::display_device()->set_current();
-    }
-    void uninstall() {
-        fltk3::DisplayDevice::display_device()->driver(replacedDriver);
-        fltk3::DisplayDevice::display_device()->set_current();
-    }
+    void install(int vw, int vh);
+    void reinstall();
+    void uninstall();
     
     virtual void rect(int x, int y, int w, int h);
     virtual void rectf(int x, int y, int w, int h);
