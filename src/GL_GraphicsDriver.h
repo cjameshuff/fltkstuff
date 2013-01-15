@@ -54,11 +54,11 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     virtual void loop(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3);
     virtual void polygon(int x0, int y0, int x1, int y1, int x2, int y2);
     virtual void polygon(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3);
-    virtual void begin_points();
-    virtual void begin_line();
-    virtual void begin_loop();
-    virtual void begin_polygon();
-    virtual void vertex(double x, double y);
+    // virtual void begin_points();
+    // virtual void begin_line();
+    // virtual void begin_loop();
+    // virtual void begin_polygon();
+    // virtual void vertex(double x, double y);
     virtual void curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3);
     virtual void circle(double x, double y, double r);
     virtual void arc(double x, double y, double r, double start, double end);
@@ -71,7 +71,7 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     virtual void begin_complex_polygon();
     virtual void gap();
     virtual void end_complex_polygon();
-    virtual void transformed_vertex(double xf, double yf);
+    // virtual void transformed_vertex(double xf, double yf);
     
     virtual void push_clip(int x, int y, int w, int h);
     virtual int clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H);

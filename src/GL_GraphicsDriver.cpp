@@ -355,45 +355,6 @@ void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2, 
     LOG("()");
 }
 
-// Note: These are well suited for optimization
-void GL_GraphicsDriver::begin_points() {
-    glBegin(GL_POINTS);
-    LOG("()");
-}
-void GL_GraphicsDriver::end_points() {
-    glEnd();
-    LOG("()");
-}
-
-void GL_GraphicsDriver::begin_line() {
-    glBegin(GL_LINES);
-    LOG("()");
-}
-void GL_GraphicsDriver::end_line() {
-    glEnd();
-    LOG("()");
-}
-
-void GL_GraphicsDriver::begin_loop() {
-    glBegin(GL_LINE_LOOP);
-    LOG("()");
-}
-void GL_GraphicsDriver::end_loop() {
-    glEnd();
-    LOG("()");
-}
-
-void GL_GraphicsDriver::begin_polygon() {
-    StartSolid();
-    glBegin(GL_POLYGON);
-    LOG("()");
-}
-void GL_GraphicsDriver::end_polygon() {
-    glEnd();
-    EndSolid();
-    LOG("()");
-}
-
 void GL_GraphicsDriver::circle(double x, double y, double r) {
     int n = min(360.0, M_PI*r);
     double cx = x + origin_x();
@@ -440,21 +401,72 @@ void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
 }
 
 
+// Note: These are well suited for optimization
+// void GL_GraphicsDriver::begin_points() {
+//     LOG("()");
+// }
+void GL_GraphicsDriver::end_points() {
+    glBegin(GL_POINTS);
+    XPOINT * p = vertices();
+    for(int j = 0, n = vertex_no(); j < n; ++j)
+        gl_vertex(p[j].x, p[j].y);
+    glEnd();
+    LOG("()");
+}
+
+// void GL_GraphicsDriver::begin_line() {
+//     LOG("()");
+// }
+void GL_GraphicsDriver::end_line() {
+    glBegin(GL_LINES);
+    XPOINT * p = vertices();
+    for(int j = 0, n = vertex_no(); j < n; ++j)
+        gl_vertex(p[j].x, p[j].y);
+    glEnd();
+    LOG("()");
+}
+
+// void GL_GraphicsDriver::begin_loop() {
+//     LOG("()");
+// }
+void GL_GraphicsDriver::end_loop() {
+    glBegin(GL_LINE_LOOP);
+    XPOINT * p = vertices();
+    for(int j = 0, n = vertex_no(); j < n; ++j)
+        gl_vertex(p[j].x, p[j].y);
+    glEnd();
+    LOG("()");
+}
+
+// void GL_GraphicsDriver::begin_polygon() {
+//     LOG("()");
+// }
+void GL_GraphicsDriver::end_polygon() {
+    StartSolid();
+    glBegin(GL_POLYGON);
+    XPOINT * p = vertices();
+    for(int j = 0, n = vertex_no(); j < n; ++j)
+        gl_vertex(p[j].x, p[j].y);
+    glEnd();
+    EndSolid();
+    LOG("()");
+}
+
 void GL_GraphicsDriver::begin_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 void GL_GraphicsDriver::end_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 
 void GL_GraphicsDriver::gap() {LOG_UNIMPLEMENTED("()");}
 
-void GL_GraphicsDriver::vertex(double x, double y) {
-    int ox = origin_x(), oy = origin_y();
-    gl_vertex(ox + transform_x(x, y), oy + transform_y(x, y));
-    LOG("()");
-}
-void GL_GraphicsDriver::transformed_vertex(double xf, double yf) {
-    int ox = origin_x(), oy = origin_y();
-    gl_vertex(ox + xf, oy + yf);
-    LOG("()");
-}
+// void GL_GraphicsDriver::vertex(double x, double y) {
+//     int ox = origin_x(), oy = origin_y();
+//     gl_vertex(ox + transform_x(x, y), oy + transform_y(x, y));
+//     LOG("()");
+// }
+// void GL_GraphicsDriver::transformed_vertex(double xf, double yf) {
+//     int ox = origin_x(), oy = origin_y();
+//     gl_vertex(ox + xf, oy + yf);
+//     LOG("()");
+// }
 
 void GL_GraphicsDriver::curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3) {LOG_UNIMPLEMENTED("()");}
 void GL_GraphicsDriver::arc(double x, double y, double r, double start, double end) {LOG_UNIMPLEMENTED("()");}
