@@ -106,6 +106,9 @@ GLView::GLView(int wx, int wy, int ww, int wh, const char * label):
     flu::FLU<fltk3::GLWindow>(wx, wy, ww, wh, label)
 {
     CustomGL_Visual(this);
+    // Needs a kick after the mode change to display properly
+    hide();
+    show();
 }
 
 void GLView::InitGL()
@@ -151,12 +154,12 @@ void GLView::draw()
     // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     
-    glEnable(GL_MULTISAMPLE);
     glGraphicsDriver->install(w(), h());
     redraw();
     draw_children();
     glGraphicsDriver->uninstall();
     
+    glFlush();
     size_t n = 4*w()*h();
     uint8_t * buf = new uint8_t[n];
     glReadPixels(0, 0, w(), h(), GL_RGB, GL_UNSIGNED_BYTE, buf);
@@ -289,9 +292,9 @@ void PopulateWindow(fltk3::Window * win)
         x += 20;
         fltk3::arc(x + 2, y + 2, 16, 16, 0, 270);
         
-        x += 30;
+        x += 20;
         fltk3::pie(x + 2, y + 2, 16, 16, 0, 270);
-        fltk3::pie(80, 80, 80, 80, 0, 270);
+        fltk3::pie(40, 250, 80, 80, 0, 270);
         
         x = 20;
         y += 40;
@@ -302,7 +305,12 @@ void PopulateWindow(fltk3::Window * win)
         }
         
         
+        x += 20;
         // fltk3::begin_points();
+        // fltk3::vertex();
+        // fltk3::transformed_vertex();
+        // fltk3::end_points();
+        
         // fltk3::begin_line();
         // fltk3::begin_loop();
         // fltk3::begin_polygon();
