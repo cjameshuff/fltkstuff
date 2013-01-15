@@ -23,6 +23,7 @@ VPATH = src
 SOURCE = main.cpp
 SOURCE += fltk3utils.cpp
 SOURCE += GL_GraphicsDriver.cpp
+SOURCE += pixfmt.cpp
 
 DEFINES = 
 

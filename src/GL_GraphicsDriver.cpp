@@ -333,6 +333,49 @@ void GL_GraphicsDriver::end_polygon() {
     LOG("()");
 }
 
+void GL_GraphicsDriver::circle(double x, double y, double r) {
+    x += origin_x();
+    y += origin_y();
+    int n = min(360.0, M_PI*r);
+    glBegin(GL_LINE_LOOP);
+    for(int j = 0; j < n; ++j) {
+        double th = (2.0*M_PI*j)/n;
+        gl_vertex(x + cos(th)*r, y + sin(th)*r);
+    }
+    glEnd();
+    LOG("()");
+}
+void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {
+    int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
+    double xr = w/2.0;
+    double yr = h/2.0;
+    x += origin_x() + xr;
+    y += origin_y() + yr;
+    glBegin(GL_LINE_STRIP);
+    for(int j = 0; j < n; ++j) {
+        double th = (2.0*M_PI/360.0)*(((double)j/(n-1))*(a2 - a1) + a1);
+        gl_vertex(x + cos(th)*xr, y - sin(th)*yr);
+    }
+    glEnd();
+    LOG("()");
+}
+void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
+    int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
+    double xr = w/2.0;
+    double yr = h/2.0;
+    x += origin_x() + xr;
+    y += origin_y() + yr;
+    glBegin(GL_TRIANGLE_FAN);
+    gl_vertex(x, y);
+    for(int j = 0; j < n; ++j) {
+        double th = (2.0*M_PI/360.0)*(((double)j/(n-1))*(a2 - a1) + a1);
+        gl_vertex(x + cos(th)*xr, y - sin(th)*yr);
+    }
+    glEnd();
+    LOG("()");
+}
+
+
 void GL_GraphicsDriver::begin_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 void GL_GraphicsDriver::end_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 
@@ -350,10 +393,7 @@ void GL_GraphicsDriver::transformed_vertex(double xf, double yf) {
 }
 
 void GL_GraphicsDriver::curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3) {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::circle(double x, double y, double r) {LOG_UNIMPLEMENTED("()");}
 void GL_GraphicsDriver::arc(double x, double y, double r, double start, double end) {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {LOG_UNIMPLEMENTED("()");}
 
 void GL_GraphicsDriver::push_clip(int x, int y, int w, int h) {LOG_UNIMPLEMENTED("()");}
 int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H) {LOG_UNIMPLEMENTED("()"); return 0;}

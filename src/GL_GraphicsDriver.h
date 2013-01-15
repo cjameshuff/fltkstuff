@@ -15,9 +15,8 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     
   protected:
     void RectVertices(int x, int y, int w, int h);
-    
+        
     double to_gl_x(double x) {return x + 0.5;}
-    
     double to_gl_y(double y) {return viewH - 0.5 - y;}
     
     void gl_vertex(double x, double y);

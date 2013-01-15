@@ -8,14 +8,15 @@
 #include <cfloat>
 
 #include <boost/format.hpp>
-#include "targa_io.h"
 
+#include <config.h>
 #include <fltk3/fltk3.h>
 #include <fltk3gl/GLWindow.h>
 #include <fltk3gl/gl.h>
 #include <fltk3/Box.h>
 
 #include "GL_GraphicsDriver.h"
+#include "pixfmt.h"
 
 #include "fltk3utils.h"
 
@@ -89,9 +90,7 @@ class Sketch: public flu::Widget {
 
 class GLView: public flu::FLU<fltk3::GLWindow> {
   public:
-    GLView(int wx, int wy, int ww, int wh, const char * label = nullptr):
-        flu::FLU<fltk3::GLWindow>(wx, wy, ww, wh, label)
-    {}
+    GLView(int wx, int wy, int ww, int wh, const char * label = nullptr);
     
     void InitGL();
     void draw();
@@ -103,9 +102,16 @@ class GLView: public flu::FLU<fltk3::GLWindow> {
     }
 };
 
+GLView::GLView(int wx, int wy, int ww, int wh, const char * label):
+    flu::FLU<fltk3::GLWindow>(wx, wy, ww, wh, label)
+{
+    CustomGL_Visual(this);
+}
+
 void GLView::InitGL()
 {
     glViewport(0, 0, w(), h());
+    
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -131,18 +137,22 @@ void GLView::draw()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-1, 1, -1, 1, -1, 1);
-    
     // cout << "GLView::draw()" << endl;
     
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(0, w(), 0, h(), -1, 1);
     
+    // Not a good way to do antialiasing, really need multisampling, but this may be a useful option...
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_LINE_SMOOTH);
+    // glEnable(GL_POLYGON_SMOOTH);
+    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    
+    glEnable(GL_MULTISAMPLE);
     glGraphicsDriver->install(w(), h());
-    // fltk3::Window::draw();
     redraw();
     draw_children();
     glGraphicsDriver->uninstall();
@@ -286,6 +296,7 @@ void PopulateWindow(fltk3::Window * win)
         
         x += 30;
         fltk3::pie(x + 2, y + 2, 16, 16, 0, 270);
+        fltk3::pie(80, 80, 80, 80, 0, 270);
         
         // fltk3::begin_points();
         // fltk3::begin_line();
@@ -306,31 +317,14 @@ void PopulateWindow(fltk3::Window * win)
 
 int main(int argc, char * argv[])
 {
+    CustomGL_Visual();
     flu::initialize();
-    
-    fltk3::gl_visual(fltk3::DOUBLE | fltk3::RGB8 | fltk3::ALPHA | fltk3::DEPTH | fltk3::MULTISAMPLE);
     
     glGraphicsDriver = new GL_GraphicsDriver;
     
-    
-    // flu::on_shortcut([]() -> int {cout << "shortcut!" << endl; return 1;});
-    
-    // UI_Controller ui;
-    // bool fullscreen = false;
     diffWindow = new DiffWindow(1024+64, 0, 512, 720);
     diffWindow->end();
     diffWindow->show();
-    
-    // flu::Window * window = new flu::Window(50, 250, 1024, 720);
-    // window->callback([&ui] {
-    //     if(fltk3::event() == fltk3::SHORTCUT && fltk3::event_key() == fltk3::EscapeKey)
-    //     {
-    //         ui.PopPane();
-    //         return;
-    //     }
-    //     exit(0);
-    // });
-    
     
     GLView * glView = new GLView(0+64, 0, 512, 720);
     glView->begin();
@@ -340,8 +334,6 @@ int main(int argc, char * argv[])
     flu::Window * standardView = new CaptureWindow(512+64, 0, 512, 720);
     PopulateWindow(standardView);
     standardView->show();
-    
-    // window->show(argc, argv);
     
     return fltk3::run();
 }
