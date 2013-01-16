@@ -148,7 +148,7 @@ void GLView::draw()
     {
         GL_GraphicsDriver glgd(this);
         redraw();
-        draw_children();
+        fltk3::Window::draw();
     }
     
     size_t n = 4*w()*h();
