@@ -25,7 +25,6 @@ using boost::format;
 
 class DiffWindow;
 
-GL_GraphicsDriver * glGraphicsDriver = nullptr;
 DiffWindow * diffWindow = nullptr;
 
 
@@ -146,20 +145,12 @@ void GLView::draw()
     glLoadIdentity();
     glOrtho(0, w(), 0, h(), -1, 1);
     
-    // Not a good way to do antialiasing, really need multisampling, but this may be a useful option...
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // glEnable(GL_LINE_SMOOTH);
-    // glEnable(GL_POLYGON_SMOOTH);
-    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    {
+        GL_GraphicsDriver glgd(this);
+        redraw();
+        draw_children();
+    }
     
-    glGraphicsDriver->install(w(), h());
-    redraw();
-    draw_children();
-    glGraphicsDriver->uninstall();
-    
-    glFlush();
     size_t n = 4*w()*h();
     uint8_t * buf = new uint8_t[n];
     glReadPixels(0, 0, w(), h(), GL_RGB, GL_UNSIGNED_BYTE, buf);
@@ -296,8 +287,8 @@ void PopulateWindow(fltk3::Window * win)
         fltk3::pie(x + 2, y + 2, 16, 16, 0, 270);
         fltk3::pie(40, 250, 80, 80, 0, 270);
         
-        x = 20;
         y += 40;
+        x = 20;
         for(int j = 0, n = 16; j < n; ++j) {
             double th = (2.0*M_PI*j)/n;
             double c = cos(th), s = sin(th);
@@ -305,11 +296,41 @@ void PopulateWindow(fltk3::Window * win)
         }
         
         
-        x += 20;
-        // fltk3::begin_points();
-        // fltk3::vertex();
-        // fltk3::transformed_vertex();
-        // fltk3::end_points();
+        x += 40;
+        fltk3::push_matrix();
+        fltk3::translate(x + 20, y + 20);
+        fltk3::rotate(36);
+        
+        fltk3::begin_points();
+        for(int j = 0; j < 8; ++j)
+        for(int k = 0; k < 8; ++k)
+            fltk3::transformed_vertex(x + 60 + (j - 4)*4, y + 20 + (k - 4)*4);
+        for(int j = 0; j < 8; ++j)
+        for(int k = 0; k < 8; ++k)
+            fltk3::vertex((j - 4)*4, (k - 4)*4);
+        fltk3::end_points();
+        fltk3::pop_matrix();
+        
+        x += 80;
+        fltk3::push_matrix();
+        fltk3::translate(x + 20, y + 20);
+        fltk3::rotate(36);
+        
+        fltk3::begin_line();
+        for(int j = 0; j < 8; ++j) {
+            fltk3::transformed_vertex(x + 60 + (j - 4)*4, y + 20 - 16);
+            fltk3::transformed_vertex(x + 60 + (j - 4)*4, y + 20 + 16);
+        }
+        fltk3::end_line();
+        
+        fltk3::begin_line();
+        for(int j = 0; j < 8; ++j) {
+            fltk3::vertex((j - 4)*4, -16);
+            fltk3::vertex((j - 4)*4, 16);
+        }
+        fltk3::end_line();
+        
+        fltk3::pop_matrix();
         
         // fltk3::begin_line();
         // fltk3::begin_loop();
@@ -330,8 +351,6 @@ int main(int argc, char * argv[])
 {
     CustomGL_Visual();
     flu::initialize();
-    
-    glGraphicsDriver = new GL_GraphicsDriver;
     
     diffWindow = new DiffWindow(1024+64, 0, 512, 720);
     diffWindow->end();

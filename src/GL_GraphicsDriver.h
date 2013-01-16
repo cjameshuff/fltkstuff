@@ -26,11 +26,10 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     void gl_vertex(double x, double y);
     
   public:
-    GL_GraphicsDriver();
+    GL_GraphicsDriver(fltk3::Rectangle * rect);
     virtual ~GL_GraphicsDriver();
     
-    void install(int vw, int vh);
-    void reinstall();
+    void install();
     void uninstall();
     
     virtual void rect(int x, int y, int w, int h);

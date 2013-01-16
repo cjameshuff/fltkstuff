@@ -1,9 +1,6 @@
 // Notes:
-// Several parts of the OpenGL context are touched by this driver:
-// The modelview and projection matrices are overwritten.
 // GL_MULTISAMPLE is initially turned off and controlled by line width, being
 // enabled briefly for each solid shape drawn.
-// Line width and stipple pattern are changed.
 
 // arc(int x, int y, int w, int h, double a1, double a2)
 // gives slightly different results from the native Quartz renderer on my Mac.
@@ -22,35 +19,65 @@ using namespace std;
 #define LOG_UNIMPLEMENTED(s) cerr << "*GL_GraphicsDriver::" << __func__ << s << endl
 // #define LOG_UNIMPLEMENTED(s)
 
-
-GL_GraphicsDriver::GL_GraphicsDriver(): fltk3::GraphicsDriver()
+GL_GraphicsDriver::GL_GraphicsDriver(fltk3::Rectangle * rect):
+    fltk3::GraphicsDriver()
 {
+    // We can't predict what some custom widgets might touch, so save everything here.
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
     
+    viewW = rect->w();
+    viewH = rect->h();
+    
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    // Could use the modelview matrix to do point transformations. For simplicity, not done at present.
+    
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, viewW, 0, viewH, -1, 1);
+    
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    
+    lineWidth = 1;
+    glLineWidth(lineWidth);
+    glDisable(GL_LINE_STIPPLE);
+    
+    glDisable(GL_MULTISAMPLE);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_FOG);
+    
+    // Not a good way to do antialiasing, really need multisampling, but this may be a useful option...
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_LINE_SMOOTH);
+    // glEnable(GL_POLYGON_SMOOTH);
+    // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    
+    install();
 }
 
 GL_GraphicsDriver::~GL_GraphicsDriver()
 {
+    uninstall();
     
-}
-
-void GL_GraphicsDriver::install(int vw, int vh) {
+    glPopAttrib();
+    glPopClientAttrib();
+    
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    glPopMatrix();
+    
     glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0, vw, 0, vh, -1, 1);
-    
-    lineWidth = 1;
-    glDisable(GL_MULTISAMPLE);
-    
-    viewW = vw;
-    viewH = vh;
-    replacedDriver = fltk3::DisplayDevice::display_device()->driver();
-    fltk3::DisplayDevice::display_device()->driver(this);
-    fltk3::DisplayDevice::display_device()->set_current();
+    glPopMatrix();
 }
 
-void GL_GraphicsDriver::reinstall() {
+void GL_GraphicsDriver::install() {
     replacedDriver = fltk3::DisplayDevice::display_device()->driver();
     fltk3::DisplayDevice::display_device()->driver(this);
     fltk3::DisplayDevice::display_device()->set_current();
@@ -70,7 +97,7 @@ void GL_GraphicsDriver::color(fltk3::Color c) {
     uninstall();
     GraphicsDriver::color(c);
     gl_color(c);
-    reinstall();
+    install();
     LOG("(c)");
 }
 void GL_GraphicsDriver::color(uchar r, uchar g, uchar b) {
@@ -78,7 +105,7 @@ void GL_GraphicsDriver::color(uchar r, uchar g, uchar b) {
     fltk3::Color c = fltk3::rgb_color(r, g, b);
     GraphicsDriver::color(c);
     gl_color(c);
-    reinstall();
+    install();
     LOG("(r, g, b)");
 }
 
@@ -86,7 +113,7 @@ void GL_GraphicsDriver::font(fltk3::Font face, fltk3::Fontsize size) {
     uninstall();
     GraphicsDriver::font(face, size);
     gl_font(face, size);
-    reinstall();
+    install();
     LOG("()");
 }
 
@@ -277,7 +304,7 @@ void GL_GraphicsDriver::draw(const char * str, int n, int x, int y) {
     x += origin_x();
     y += origin_y();
     gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    reinstall();
+    install();
     LOG("()");
 }
 void GL_GraphicsDriver::draw(int angle, const char * str, int n, int x, int y) {
@@ -286,7 +313,7 @@ void GL_GraphicsDriver::draw(int angle, const char * str, int n, int x, int y) {
     x += origin_x();
     y += origin_y();
     gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    reinstall();
+    install();
     LOG_UNIMPLEMENTED("()");
 }
 void GL_GraphicsDriver::rtl_draw(const char * str, int n, int x, int y) {
@@ -295,7 +322,7 @@ void GL_GraphicsDriver::rtl_draw(const char * str, int n, int x, int y) {
     x += origin_x();
     y += origin_y();
     gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    reinstall();
+    install();
     LOG_UNIMPLEMENTED("()");
 }
 
@@ -418,11 +445,13 @@ void GL_GraphicsDriver::end_points() {
 //     LOG("()");
 // }
 void GL_GraphicsDriver::end_line() {
-    glBegin(GL_LINES);
+    StartSolid();// Not actually solid, but treated as such for AA
+    glBegin(GL_LINE_STRIP);
     XPOINT * p = vertices();
     for(int j = 0, n = vertex_no(); j < n; ++j)
         gl_vertex(p[j].x, p[j].y);
     glEnd();
+    EndSolid();
     LOG("()");
 }
 
@@ -430,11 +459,13 @@ void GL_GraphicsDriver::end_line() {
 //     LOG("()");
 // }
 void GL_GraphicsDriver::end_loop() {
+    StartSolid();// Not actually solid, but treated as such for AA
     glBegin(GL_LINE_LOOP);
     XPOINT * p = vertices();
     for(int j = 0, n = vertex_no(); j < n; ++j)
         gl_vertex(p[j].x, p[j].y);
     glEnd();
+    EndSolid();
     LOG("()");
 }
 
@@ -493,7 +524,7 @@ void GL_GraphicsDriver::draw(fltk3::Bitmap * bm, int XP, int YP, int WP, int HP,
 double GL_GraphicsDriver::width(const char * str, int n) {
     uninstall();
     int w = gl_width(str, n);
-    reinstall();
+    install();
     LOG("()");
     return w;
 }
@@ -503,20 +534,20 @@ void GL_GraphicsDriver::text_extents(const char * str, int n, int & dx, int & dy
     dy = gl_descent();
     w = gl_width(str, n);
     h = gl_height();
-    reinstall();
+    install();
     LOG("()");
 }
 int GL_GraphicsDriver::height() {
     uninstall();
     int h = gl_height();
-    reinstall();
+    install();
     LOG("()");
     return h;
 }
 int GL_GraphicsDriver::descent() {
     uninstall();
     int d = gl_descent();
-    reinstall();
+    install();
     LOG("()");
     return d;
 }
