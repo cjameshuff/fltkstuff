@@ -402,6 +402,8 @@ void GL_GraphicsDriver::circle(double x, double y, double r) {
     LOG("()");
 }
 void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {
+    w -= 1; h -= 1;
+    // Arcs are apparently drawn 1 pixel smaller than specified...line width related?
     int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
     double xr = w/2.0;
     double yr = h/2.0;
