@@ -1,9 +1,14 @@
 // Notes:
 // GL_MULTISAMPLE is initially turned off and controlled by line width, being
 // enabled briefly for each solid shape drawn.
-
+// 
 // arc(int x, int y, int w, int h, double a1, double a2)
 // gives slightly different results from the native Quartz renderer on my Mac.
+// 
+// OpenGL line antialiasing is fairly ugly. Line smoothing may work better, but
+// is often unsupported. Polygon smoothing is *usually* unsupported. Full-screen
+// antialiasing can also be implemented via the accumulation buffer, at a cost
+// in performance. AA settings should probably be configurable.
 
 #include "GL_GraphicsDriver.h"
 #include "fltk3gl/gl.h"
@@ -47,6 +52,8 @@ GL_GraphicsDriver::GL_GraphicsDriver(fltk3::Rectangle * rect):
     glDisable(GL_LINE_STIPPLE);
     
     glDisable(GL_MULTISAMPLE);
+    glHint(GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST);
+    
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glDisable(GL_LIGHTING);
