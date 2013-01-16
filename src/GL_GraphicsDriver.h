@@ -58,9 +58,9 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     // virtual void begin_loop();
     // virtual void begin_polygon();
     // virtual void vertex(double x, double y);
-    virtual void curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3);
+    // virtual void curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3);
     virtual void circle(double x, double y, double r);
-    virtual void arc(double x, double y, double r, double start, double end);
+    // virtual void arc(double x, double y, double r, double start, double end);
     virtual void arc(int x, int y, int w, int h, double a1, double a2);
     virtual void pie(int x, int y, int w, int h, double a1, double a2);
     virtual void end_points();

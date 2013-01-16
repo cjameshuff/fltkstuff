@@ -437,10 +437,6 @@ void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
 }
 
 
-// Note: These are well suited for optimization
-// void GL_GraphicsDriver::begin_points() {
-//     LOG("()");
-// }
 void GL_GraphicsDriver::end_points() {
     glBegin(GL_POINTS);
     XPOINT * p = vertices();
@@ -450,9 +446,6 @@ void GL_GraphicsDriver::end_points() {
     LOG("()");
 }
 
-// void GL_GraphicsDriver::begin_line() {
-//     LOG("()");
-// }
 void GL_GraphicsDriver::end_line() {
     StartSolid();// Not actually solid, but treated as such for AA
     glBegin(GL_LINE_STRIP);
@@ -464,9 +457,6 @@ void GL_GraphicsDriver::end_line() {
     LOG("()");
 }
 
-// void GL_GraphicsDriver::begin_loop() {
-//     LOG("()");
-// }
 void GL_GraphicsDriver::end_loop() {
     StartSolid();// Not actually solid, but treated as such for AA
     glBegin(GL_LINE_LOOP);
@@ -478,9 +468,6 @@ void GL_GraphicsDriver::end_loop() {
     LOG("()");
 }
 
-// void GL_GraphicsDriver::begin_polygon() {
-//     LOG("()");
-// }
 void GL_GraphicsDriver::end_polygon() {
     StartSolid();
     glBegin(GL_POLYGON);
@@ -496,20 +483,6 @@ void GL_GraphicsDriver::begin_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 void GL_GraphicsDriver::end_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 
 void GL_GraphicsDriver::gap() {LOG_UNIMPLEMENTED("()");}
-
-// void GL_GraphicsDriver::vertex(double x, double y) {
-//     int ox = origin_x(), oy = origin_y();
-//     gl_vertex(ox + transform_x(x, y), oy + transform_y(x, y));
-//     LOG("()");
-// }
-// void GL_GraphicsDriver::transformed_vertex(double xf, double yf) {
-//     int ox = origin_x(), oy = origin_y();
-//     gl_vertex(ox + xf, oy + yf);
-//     LOG("()");
-// }
-
-void GL_GraphicsDriver::curve(double X0, double Y0, double X1, double Y1, double X2, double Y2, double X3, double Y3) {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::arc(double x, double y, double r, double start, double end) {LOG_UNIMPLEMENTED("()");}
 
 void GL_GraphicsDriver::push_clip(int x, int y, int w, int h) {LOG_UNIMPLEMENTED("()");}
 int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H) {LOG_UNIMPLEMENTED("()"); return 0;}
