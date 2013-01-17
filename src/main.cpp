@@ -26,6 +26,16 @@ using boost::format;
 class DiffWindow;
 
 DiffWindow * diffWindow = nullptr;
+uint8_t * testImg;
+
+template<typename genfn_t>
+uint8_t * GenTestImage(int w, int h, int depth, const genfn_t & fn) {
+    uint8_t * data = new uint8_t[depth*w*h];
+    for(int x = 0; x < w; ++x)
+    for(int y = 0; y < h; ++y)
+        fn(x, y, data + depth*(y*w + x));
+    return data;
+}
 
 
 class DiffWindow: public flu::Window {
@@ -332,6 +342,10 @@ void PopulateWindow(fltk3::Window * win)
         
         fltk3::pop_matrix();
         
+        x = 20;
+        y += 40;
+        fltk3::draw_image(testImg, x, y, 40, 40, 3, 0);
+        
         // fltk3::begin_line();
         // fltk3::begin_loop();
         // fltk3::begin_polygon();
@@ -349,6 +363,13 @@ void PopulateWindow(fltk3::Window * win)
 
 int main(int argc, char * argv[])
 {
+    testImg = GenTestImage(40, 40, 3, [](int x, int y, uint8_t * pix){
+        double th = atan2(y - 10, x - 10);
+        pix[0] = 255*((sin(th) + 1.0)/2.0);
+        pix[1] = 255*((sin(th + M_PI*2.0/3.0) + 1.0)/2.0);
+        pix[2] = 255*((sin(th - M_PI*2.0/3.0) + 1.0)/2.0);
+    });
+    
     CustomGL_Visual();
     flu::initialize();
     

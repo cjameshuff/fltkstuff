@@ -75,8 +75,8 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     virtual void push_clip(int x, int y, int w, int h);
     virtual int clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H);
     virtual int not_clipped(int x, int y, int w, int h);
-    virtual void push_no_clip();
-    virtual void pop_clip();
+    // virtual void push_no_clip();
+    // virtual void pop_clip();
     virtual void restore_clip();
     
     // Images

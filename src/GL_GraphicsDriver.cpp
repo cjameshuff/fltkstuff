@@ -19,8 +19,8 @@
 
 using namespace std;
 
-#define LOG(s) cerr << "GL_GraphicsDriver::" << __func__ << s << endl
-// #define LOG(s) 
+// #define LOG(s) cerr << "GL_GraphicsDriver::" << __func__ << s << endl
+#define LOG(s) 
 #define LOG_UNIMPLEMENTED(s) cerr << "*GL_GraphicsDriver::" << __func__ << s << endl
 // #define LOG_UNIMPLEMENTED(s)
 
@@ -124,7 +124,8 @@ void GL_GraphicsDriver::font(fltk3::Font face, fltk3::Fontsize size) {
     LOG("()");
 }
 
-void GL_GraphicsDriver::line_style(int style, int width, char * dashes) {
+void GL_GraphicsDriver::line_style(int style, int width, char * dashes)
+{
     cerr << "line_style " << style << ", " << width << ", ";
     if(dashes) {
         while(*dashes)
@@ -165,6 +166,10 @@ void GL_GraphicsDriver::EndSolid() {
         glDisable(GL_MULTISAMPLE);
 }
 
+
+// ****************************************************************************
+// Drawing commands
+// ****************************************************************************
 
 void GL_GraphicsDriver::RectVertices(double x, double y, double w, double h)
 {
@@ -294,6 +299,10 @@ void GL_GraphicsDriver::line(int x, int y, int x1, int y1) {
     gl_vertex(ox + x, oy + y);
     gl_vertex(ox + x1, oy + y1);
     glEnd();
+    // Lines consistently seem one pixel short. Plop a point down to finish them.
+    glBegin(GL_POINTS);
+    gl_vertex(ox + x1, oy + y1);
+    glEnd();
     LOG("()");
 }
 void GL_GraphicsDriver::line(int x, int y, int x1, int y1, int x2, int y2) {
@@ -306,33 +315,6 @@ void GL_GraphicsDriver::line(int x, int y, int x1, int y1, int x2, int y2) {
     LOG("(2)");
 }
 
-void GL_GraphicsDriver::draw(const char * str, int n, int x, int y) {
-    uninstall();
-    x += origin_x();
-    y += origin_y();
-    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    install();
-    LOG("()");
-}
-void GL_GraphicsDriver::draw(int angle, const char * str, int n, int x, int y) {
-    uninstall();
-    // FIXME
-    x += origin_x();
-    y += origin_y();
-    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    install();
-    LOG_UNIMPLEMENTED("()");
-}
-void GL_GraphicsDriver::rtl_draw(const char * str, int n, int x, int y) {
-    uninstall();
-    // FIXME
-    x += origin_x();
-    y += origin_y();
-    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
-    install();
-    LOG_UNIMPLEMENTED("()");
-}
-
 
 void GL_GraphicsDriver::point(int x, int y) {
     x += origin_x();
@@ -342,6 +324,7 @@ void GL_GraphicsDriver::point(int x, int y) {
     glEnd();
     LOG("()");
 }
+
 
 void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2) {
     int ox = origin_x(), oy = origin_y();
@@ -484,22 +467,155 @@ void GL_GraphicsDriver::end_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 
 void GL_GraphicsDriver::gap() {LOG_UNIMPLEMENTED("()");}
 
-void GL_GraphicsDriver::push_clip(int x, int y, int w, int h) {LOG_UNIMPLEMENTED("()");}
-int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H) {LOG_UNIMPLEMENTED("()"); return 0;}
-int GL_GraphicsDriver::not_clipped(int x, int y, int w, int h) {LOG_UNIMPLEMENTED("()"); return 1;}
-void GL_GraphicsDriver::push_no_clip() {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::pop_clip() {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::restore_clip() {LOG_UNIMPLEMENTED("()");}
 
+// ****************************************************************************
+// Clipping
+// This needs attention. Clipping might best be done with the stencil buffer.
+// ****************************************************************************
+
+void GL_GraphicsDriver::push_clip(int x, int y, int w, int h)
+{
+    LOG_UNIMPLEMENTED("()");
+}
+int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H) {
+    LOG_UNIMPLEMENTED("()");
+    // Simply return given bounding rect
+    X = x;
+    Y = y;
+    W = w;
+    H = h;
+    return 0;
+}
+int GL_GraphicsDriver::not_clipped(int x, int y, int w, int h) {
+    LOG_UNIMPLEMENTED("()");
+    return 1;// Rect is assumed to be visible.
+}
+void GL_GraphicsDriver::restore_clip() {
+    LOG_UNIMPLEMENTED("()");
+}
+
+
+// ****************************************************************************
 // Images
-void GL_GraphicsDriver::draw_image(const uchar * buf, int X, int Y, int W, int H, int D, int L) {LOG_UNIMPLEMENTED("(const uchar * buf)");}
-void GL_GraphicsDriver::draw_image_mono(const uchar * buf, int X, int Y, int W, int H, int D, int L) {LOG_UNIMPLEMENTED("(const uchar * buf)");}
-void GL_GraphicsDriver::draw_image(fltk3::DrawImageCb cb, void * data, int X, int Y, int W, int H, int D) {LOG_UNIMPLEMENTED("(fltk3::DrawImageCb cb)");}
-void GL_GraphicsDriver::draw_image_mono(fltk3::DrawImageCb cb, void * data, int X, int Y, int W, int H, int D) {LOG_UNIMPLEMENTED("(fltk3::DrawImageCb cb)");}
+// ****************************************************************************
 
-void GL_GraphicsDriver::draw(fltk3::RGBImage * rgb, int XP, int YP, int WP, int HP, int cx, int cy) {LOG_UNIMPLEMENTED("(fltk3::RGBImage)");}
-void GL_GraphicsDriver::draw(fltk3::Pixmap * pxm, int XP, int YP, int WP, int HP, int cx, int cy) {LOG_UNIMPLEMENTED("(fltk3::Pixmap)");}
-void GL_GraphicsDriver::draw(fltk3::Bitmap * bm, int XP, int YP, int WP, int HP, int cx, int cy) {LOG_UNIMPLEMENTED("(fltk3::Bitmap)");}
+void GL_GraphicsDriver::draw_image(const uchar * buf, int X, int Y, int W, int H, int D, int L)
+{
+    if(L == 0)
+        L = W*D;
+    
+    glPixelZoom((D < 0)? -1 : 1, (L < 0)? 1 : -1);
+    
+    if(D < 0) {
+        D = -D;
+        X += W;
+    }
+    if(L < 0) {
+        L = -L;
+        Y -= H;
+    }
+    
+    glRasterPos2i(origin_x() + X, viewH - (origin_y() + Y));
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, L/D);
+    switch(D)
+    {
+        case 1: glDrawPixels(W, H, GL_LUMINANCE, GL_UNSIGNED_BYTE, buf); break;
+        case 2: glDrawPixels(W, H, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, buf); break;
+        case 3: glDrawPixels(W, H, GL_RGB, GL_UNSIGNED_BYTE, buf); break;
+        case 4: glDrawPixels(W, H, GL_RGBA, GL_UNSIGNED_BYTE, buf); break;
+        default:
+            cerr << __func__ << "Image depth not supported by GL_GraphicsDriver" << endl;
+    }
+    LOG("(const uchar * buf)");
+}
+void GL_GraphicsDriver::draw_image_mono(const uchar * buf, int X, int Y, int W, int H, int D, int L) {
+    draw_image(buf, X, Y, W, H, D, L);
+    LOG("(const uchar * buf)");
+}
+
+void GL_GraphicsDriver::draw_image(fltk3::DrawImageCb cb, void * data, int X, int Y, int W, int H, int D) {
+    // Reconstruct image
+    uint8_t * buf = new uint8_t[D*W*H];
+    for(int y = 0; y < H; ++y)
+        cb(data, 0, y, W, buf + D*W*y);
+    
+    draw_image(buf, X, Y, W, H, D, 0);
+    delete[] buf;
+    LOG("(fltk3::DrawImageCb cb)");
+}
+void GL_GraphicsDriver::draw_image_mono(fltk3::DrawImageCb cb, void * data, int X, int Y, int W, int H, int D) {
+    draw_image(cb, data, X, Y, W, H, D);
+    LOG("(fltk3::DrawImageCb cb)");
+}
+
+
+void draw_empty(fltk3::Image * img, int X, int Y) {
+    if(img->w() > 0 && img->h() > 0) {
+        fltk3::color(fltk3::FOREGROUND_COLOR);
+        fltk3::rect(X, Y, img->w(), img->h());
+        fltk3::line(X, Y, X + img->w() - 1, Y + img->h() - 1);
+        fltk3::line(X, Y + img->h() - 1, X + img->w() - 1, Y);
+    }
+}
+void GL_GraphicsDriver::draw(fltk3::RGBImage * rgb, int X, int Y, int W, int H, int cx, int cy) {
+    // depth must be > 0, must have data
+    if(rgb->d() == 0 || !rgb->data()) {
+        draw_empty(rgb, X, Y);
+        return;
+    }
+    if(W > rgb->w() - cx)
+        W = rgb->w() - cx;
+    if(H > rgb->h() - cy)
+        H = rgb->h() - cy;
+    
+    // FIXME: Not at all sure if this is the right behavior...
+    const uint8_t * data = (const uint8_t *)rgb->data() + rgb->d()*(cy*rgb->ld() + cx);
+    draw_image(data, X, Y, W, H, rgb->d(), rgb->ld());
+    LOG("(fltk3::RGBImage)");
+}
+void GL_GraphicsDriver::draw(fltk3::Pixmap * pxm, int XP, int YP, int WP, int HP, int cx, int cy) {
+    LOG_UNIMPLEMENTED("(fltk3::Pixmap)");
+}
+void GL_GraphicsDriver::draw(fltk3::Bitmap * bm, int XP, int YP, int WP, int HP, int cx, int cy) {
+    LOG_UNIMPLEMENTED("(fltk3::Bitmap)");
+}
+
+void GL_GraphicsDriver::copy_offscreen(int x, int y, int w, int h, fltk3::Offscreen pixmap, int srcx, int srcy)
+{
+    LOG_UNIMPLEMENTED("()");
+}
+
+
+// ****************************************************************************
+// Text
+// ****************************************************************************
+
+void GL_GraphicsDriver::draw(const char * str, int n, int x, int y) {
+    uninstall();
+    x += origin_x();
+    y += origin_y();
+    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
+    install();
+    LOG("()");
+}
+void GL_GraphicsDriver::draw(int angle, const char * str, int n, int x, int y) {
+    uninstall();
+    // FIXME
+    x += origin_x();
+    y += origin_y();
+    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
+    install();
+    LOG_UNIMPLEMENTED("(angle)");
+}
+void GL_GraphicsDriver::rtl_draw(const char * str, int n, int x, int y) {
+    uninstall();
+    // FIXME
+    x += origin_x();
+    y += origin_y();
+    gl_draw(str, n, (int)to_gl_x(x), (int)to_gl_y(y));
+    install();
+    LOG_UNIMPLEMENTED("()");
+}
 
 
 // FIXME: make this non-ugly. Doing this properly probably will require changes in FLTK...
@@ -534,10 +650,10 @@ int GL_GraphicsDriver::descent() {
     return d;
 }
 
-void GL_GraphicsDriver::copy_offscreen(int x, int y, int w, int h, fltk3::Offscreen pixmap, int srcx, int srcy)
-{
-    LOG_UNIMPLEMENTED("()");
-}
+
+// ****************************************************************************
+// Misc
+// ****************************************************************************
 
 char GL_GraphicsDriver::can_do_alpha_blending() {
     LOG_UNIMPLEMENTED("()");
