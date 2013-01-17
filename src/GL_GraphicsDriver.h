@@ -3,6 +3,9 @@
 #define GL_GRAPHICSDRIVER_H
 
 #include "fltk3/Device.h"
+#include "fltk3gl/gl.h"
+#include "fltk3gl/glu.h"
+#include <vector>
 
 // Correct call sequence?
 // glGraphicsDriver->set_current();
@@ -13,6 +16,7 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     fltk3::GraphicsDriver * replacedDriver;
     int viewW, viewH;
     double lineWidth;
+    std::vector<int> cpolyContours;
     
   protected:
     void RectVertices(double x, double y, double w, double h);
@@ -67,7 +71,7 @@ class GL_GraphicsDriver: public fltk3::GraphicsDriver {
     virtual void end_line();
     virtual void end_loop();
     virtual void end_polygon();
-    virtual void begin_complex_polygon();
+    // virtual void begin_complex_polygon();
     virtual void gap();
     virtual void end_complex_polygon();
     // virtual void transformed_vertex(double xf, double yf);

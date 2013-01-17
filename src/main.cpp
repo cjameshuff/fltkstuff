@@ -342,6 +342,23 @@ void PopulateWindow(fltk3::Window * win)
         
         fltk3::pop_matrix();
         
+        x += 80;
+        fltk3::begin_complex_polygon();
+        fltk3::push_matrix();
+        fltk3::translate(x, y);
+        fltk3::vertex(2, 38);
+        fltk3::vertex(20, 10);
+        fltk3::vertex(38, 38);
+        fltk3::vertex(20, 2);
+        fltk3::gap();
+        fltk3::vertex(20, 30);
+        fltk3::vertex(10, 10);
+        fltk3::vertex(30, 10);
+        fltk3::pop_matrix();
+        fltk3::end_complex_polygon();
+        
+        
+        
         x = 20;
         y += 40;
         fltk3::draw_image(testImg, x, y, 40, 40, 3, 0);

@@ -11,7 +11,6 @@
 // in performance. AA settings should probably be configurable.
 
 #include "GL_GraphicsDriver.h"
-#include "fltk3gl/gl.h"
 #include "fltk3/draw.h"
 
 #include <cmath>
@@ -192,13 +191,16 @@ void GL_GraphicsDriver::RectVertices(double x, double y, double w, double h)
 }
 
 
-void GL_GraphicsDriver::rect(int x, int y, int w, int h) {
+void GL_GraphicsDriver::rect(int x, int y, int w, int h)
+{
     glBegin(GL_LINE_LOOP);
     RectVertices(x, y, w - 1, h - 1);
     glEnd();
     LOG("()");
 }
-void GL_GraphicsDriver::rectf(int x, int y, int w, int h) {
+
+void GL_GraphicsDriver::rectf(int x, int y, int w, int h)
+{
     StartSolid();
     glBegin(GL_POLYGON);
     // Note offset, required for clear drawing/pixel alignment
@@ -209,7 +211,8 @@ void GL_GraphicsDriver::rectf(int x, int y, int w, int h) {
 }
 
 
-void GL_GraphicsDriver::xyline(int x, int y, int x1) {
+void GL_GraphicsDriver::xyline(int x, int y, int x1)
+{
     int ox = origin_x(), oy = origin_y();
     if(x1 > x)
         x1 += 1;
@@ -222,7 +225,9 @@ void GL_GraphicsDriver::xyline(int x, int y, int x1) {
     glEnd();
     LOG("(x)");
 }
-void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2) {
+
+void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2)
+{
     int ox = origin_x(), oy = origin_y();
     if(y2 > y)
         y2 += 1;
@@ -235,7 +240,9 @@ void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2) {
     glEnd();
     LOG("(xy)");
 }
-void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2, int x3) {
+
+void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2, int x3)
+{
     int ox = origin_x(), oy = origin_y();
     if(x3 > x1)
         x3 += 1;
@@ -250,7 +257,9 @@ void GL_GraphicsDriver::xyline(int x, int y, int x1, int y2, int x3) {
     LOG("(xyx)");
     
 }
-void GL_GraphicsDriver::yxline(int x, int y, int y1) {
+
+void GL_GraphicsDriver::yxline(int x, int y, int y1)
+{
     int ox = origin_x(), oy = origin_y();
     if(y1 > y)
         y1 += 1;
@@ -263,7 +272,9 @@ void GL_GraphicsDriver::yxline(int x, int y, int y1) {
     glEnd();
     LOG("(y)");
 }
-void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2) {
+
+void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2)
+{
     int ox = origin_x(), oy = origin_y();
     if(x2 > x)
         x2 += 1;
@@ -277,7 +288,9 @@ void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2) {
     glEnd();
     LOG("(yx)");
 }
-void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2, int y3) {
+
+void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2, int y3)
+{
     int ox = origin_x(), oy = origin_y();
     if(y3 > y1)
         y3 += 1;
@@ -292,7 +305,8 @@ void GL_GraphicsDriver::yxline(int x, int y, int y1, int x2, int y3) {
     LOG("(yxy)");
 }
 
-void GL_GraphicsDriver::line(int x, int y, int x1, int y1) {
+void GL_GraphicsDriver::line(int x, int y, int x1, int y1)
+{
     int ox = origin_x(), oy = origin_y();
     
     glBegin(GL_LINES);
@@ -305,7 +319,9 @@ void GL_GraphicsDriver::line(int x, int y, int x1, int y1) {
     glEnd();
     LOG("()");
 }
-void GL_GraphicsDriver::line(int x, int y, int x1, int y1, int x2, int y2) {
+
+void GL_GraphicsDriver::line(int x, int y, int x1, int y1, int x2, int y2)
+{
     int ox = origin_x(), oy = origin_y();
     glBegin(GL_LINE_STRIP);
     gl_vertex(ox + x, oy + y);
@@ -316,7 +332,8 @@ void GL_GraphicsDriver::line(int x, int y, int x1, int y1, int x2, int y2) {
 }
 
 
-void GL_GraphicsDriver::point(int x, int y) {
+void GL_GraphicsDriver::point(int x, int y)
+{
     x += origin_x();
     y += origin_y();
     glBegin(GL_POINTS);
@@ -326,7 +343,8 @@ void GL_GraphicsDriver::point(int x, int y) {
 }
 
 
-void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2) {
+void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2)
+{
     int ox = origin_x(), oy = origin_y();
     glBegin(GL_LINE_STRIP);
     gl_vertex(ox + x0, oy + y0);
@@ -336,7 +354,9 @@ void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2) {
     glEnd();
     LOG("()");
 }
-void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3) {
+
+void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3)
+{
     int ox = origin_x(), oy = origin_y();
     glBegin(GL_LINE_STRIP);
     gl_vertex(ox + x0, oy + y0);
@@ -348,7 +368,8 @@ void GL_GraphicsDriver::loop(int x0, int y0, int x1, int y1, int x2, int y2, int
     LOG("()");
 }
 
-void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2) {
+void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2)
+{
     int ox = origin_x(), oy = origin_y();
     StartSolid();
     glBegin(GL_TRIANGLES);
@@ -359,7 +380,9 @@ void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2) 
     EndSolid();
     LOG("()");
 }
-void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3) {
+
+void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2, int x3, int y3)
+{
     int ox = origin_x(), oy = origin_y();
     StartSolid();
     glBegin(GL_QUADS);
@@ -372,7 +395,8 @@ void GL_GraphicsDriver::polygon(int x0, int y0, int x1, int y1, int x2, int y2, 
     LOG("()");
 }
 
-void GL_GraphicsDriver::circle(double x, double y, double r) {
+void GL_GraphicsDriver::circle(double x, double y, double r)
+{
     int n = min(360.0, M_PI*r);
     double cx = x + origin_x();
     double cy = y + origin_y();
@@ -384,7 +408,9 @@ void GL_GraphicsDriver::circle(double x, double y, double r) {
     glEnd();
     LOG("()");
 }
-void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {
+
+void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2)
+{
     w -= 1; h -= 1;
     // Arcs are apparently drawn 1 pixel smaller than specified...line width related?
     int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
@@ -400,7 +426,9 @@ void GL_GraphicsDriver::arc(int x, int y, int w, int h, double a1, double a2) {
     glEnd();
     LOG("()");
 }
-void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
+
+void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2)
+{
     int n = min(360.0, M_PI*(w + h)/4.0*(a2 - a1)/360.0);
     double xr = w/2.0;
     double yr = h/2.0;
@@ -420,7 +448,8 @@ void GL_GraphicsDriver::pie(int x, int y, int w, int h, double a1, double a2) {
 }
 
 
-void GL_GraphicsDriver::end_points() {
+void GL_GraphicsDriver::end_points()
+{
     glBegin(GL_POINTS);
     XPOINT * p = vertices();
     for(int j = 0, n = vertex_no(); j < n; ++j)
@@ -429,7 +458,8 @@ void GL_GraphicsDriver::end_points() {
     LOG("()");
 }
 
-void GL_GraphicsDriver::end_line() {
+void GL_GraphicsDriver::end_line()
+{
     StartSolid();// Not actually solid, but treated as such for AA
     glBegin(GL_LINE_STRIP);
     XPOINT * p = vertices();
@@ -440,7 +470,8 @@ void GL_GraphicsDriver::end_line() {
     LOG("()");
 }
 
-void GL_GraphicsDriver::end_loop() {
+void GL_GraphicsDriver::end_loop()
+{
     StartSolid();// Not actually solid, but treated as such for AA
     glBegin(GL_LINE_LOOP);
     XPOINT * p = vertices();
@@ -451,7 +482,8 @@ void GL_GraphicsDriver::end_loop() {
     LOG("()");
 }
 
-void GL_GraphicsDriver::end_polygon() {
+void GL_GraphicsDriver::end_polygon()
+{
     StartSolid();
     glBegin(GL_POLYGON);
     XPOINT * p = vertices();
@@ -462,10 +494,92 @@ void GL_GraphicsDriver::end_polygon() {
     LOG("()");
 }
 
-void GL_GraphicsDriver::begin_complex_polygon() {LOG_UNIMPLEMENTED("()");}
-void GL_GraphicsDriver::end_complex_polygon() {LOG_UNIMPLEMENTED("()");}
 
-void GL_GraphicsDriver::gap() {LOG_UNIMPLEMENTED("()");}
+// void GL_GraphicsDriver::begin_complex_polygon()
+// {
+//     fltk3::GraphicsDriver::begin_complex_polygon();
+//     LOG("()");
+// }
+
+static void TessCombineCB(GLdouble coords[3], GLvoid * points[4], GLfloat weights[4], GLvoid ** vertData, GLvoid * userData)
+{
+    // Tesselator generated a new vertex, needs somewhere to put it
+    double * newPt = new double[3];
+    ((std::vector<double *>*)userData)->push_back(newPt);
+    newPt[0] = coords[0];
+    newPt[1] = coords[1];
+    newPt[2] = coords[2];
+    *vertData = newPt;
+}
+
+static void TessErrorCB(GLenum errorCode)
+{
+    cerr << "GLU tesselation error: " << gluErrorString(errorCode) << endl;
+}
+
+void GL_GraphicsDriver::end_complex_polygon()
+{
+    XPOINT * p = vertices();
+    std::vector<double> cpolyPts;
+    std::vector<double *> newPts;
+    
+    // Copy points to temp buffer
+    for(int j = 0, n = vertex_no(); j < n; ++j) {
+        cpolyPts.push_back(to_gl_x(p[j].x));
+        cpolyPts.push_back(to_gl_y(p[j].y));
+        cpolyPts.push_back(0.0);
+    }
+    
+    // Tesselate polygon
+    StartSolid();
+    GLUtriangulatorObj * cpoly = gluNewTess();
+    gluTessCallback(cpoly, GLU_TESS_BEGIN, (GLvoid (*)())glBegin);
+    gluTessCallback(cpoly, GLU_TESS_VERTEX, (GLvoid (*)())glVertex3dv);
+    gluTessCallback(cpoly, GLU_TESS_COMBINE_DATA, (GLvoid (*)())TessCombineCB);
+    gluTessCallback(cpoly, GLU_TESS_END, (GLvoid (*)())glEnd);
+    gluTessCallback(cpoly, GLU_TESS_ERROR, (GLvoid (*)())TessErrorCB);
+    
+    gluTessBeginPolygon(cpoly, (GLvoid*)&newPts);
+    gluTessBeginContour(cpoly);
+    
+    std::vector<int>::iterator cont = cpolyContours.begin();
+    for(int j = 0, n = vertex_no(); j < n; ++j)
+    {
+        if(cont != cpolyContours.end() && *cont == j) {
+            gluTessEndContour(cpoly);
+            gluTessBeginContour(cpoly);
+            ++cont;
+        }
+        gluTessVertex(cpoly, &(cpolyPts[j*3]), &(cpolyPts[j*3]));
+    }
+    
+    gluTessEndContour(cpoly);
+    gluTessEndPolygon(cpoly);
+    gluDeleteTess(cpoly);
+    
+    std::vector<double *>::iterator np = newPts.begin();
+    while(np != newPts.end()) {
+        delete[] *np;
+        ++np;
+    }
+    
+    cpolyContours.clear();
+    EndSolid();
+    LOG("()");
+}
+
+void GL_GraphicsDriver::gap()
+{
+    // As far as I can tell, "gap" breaks to a new contour polygon.
+    // GraphicsDriver::gap() does something rather obscure, perhaps
+    // closing the previous contour.
+    // Instead, here we just make a note of the index.
+    if(!cpolyContours.empty() && vertex_no() == cpolyContours.back())
+        return;// No points since last call, ignore
+    
+    cpolyContours.push_back(vertex_no());
+    LOG("()");
+}
 
 
 // ****************************************************************************
