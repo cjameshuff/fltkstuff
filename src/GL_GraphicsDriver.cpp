@@ -9,6 +9,11 @@
 // is often unsupported. Polygon smoothing is *usually* unsupported. Full-screen
 // antialiasing can also be implemented via the accumulation buffer, at a cost
 // in performance. AA settings should probably be configurable.
+// 
+// Still to be done:
+// Line joins/caps
+// proper image support
+// rotated and RTL text
 
 #include "GL_GraphicsDriver.h"
 #include "fltk3/draw.h"
@@ -65,6 +70,8 @@ GL_GraphicsDriver::GL_GraphicsDriver(fltk3::Rectangle * rect):
     // glEnable(GL_POLYGON_SMOOTH);
     // glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     // glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+    
+    push_no_clip();
     
     install();
 }
@@ -584,28 +591,58 @@ void GL_GraphicsDriver::gap()
 
 // ****************************************************************************
 // Clipping
-// This needs attention. Clipping might best be done with the stencil buffer.
 // ****************************************************************************
 
 void GL_GraphicsDriver::push_clip(int x, int y, int w, int h)
 {
-    LOG_UNIMPLEMENTED("()");
+    glEnable(GL_SCISSOR_TEST);
+    regionStack.push(regionStack.top());
+    regionStack.top().intersect(fltk3::Rectangle(x, y, w, h));
+    restore_clip();
+    LOG("()");
 }
-int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H) {
-    LOG_UNIMPLEMENTED("()");
-    // Simply return given bounding rect
-    X = x;
-    Y = y;
-    W = w;
-    H = h;
-    return 0;
+
+void GL_GraphicsDriver::push_no_clip()
+{
+    glDisable(GL_SCISSOR_TEST);
+    regionStack.push(fltk3::Rectangle(0, 0, viewW, viewH));
+    LOG("()");
 }
-int GL_GraphicsDriver::not_clipped(int x, int y, int w, int h) {
-    LOG_UNIMPLEMENTED("()");
-    return 1;// Rect is assumed to be visible.
+
+void GL_GraphicsDriver::pop_clip()
+{
+    regionStack.pop();
+    fltk3::Rectangle & r = regionStack.top();
+    if(r.x() == 0 && r.y() == 0 && r.w() == viewW && r.h() == viewH)
+        glDisable(GL_SCISSOR_TEST);
+    restore_clip();
+    LOG("()");
 }
+
+int GL_GraphicsDriver::clip_box(int x, int y, int w, int h, int & X, int & Y, int & W, int & H)
+{
+    LOG("()");
+    fltk3::Rectangle rect(x, y, w, h);
+    rect.intersect(regionStack.top());
+    X = rect.x();
+    Y = rect.y();
+    W = rect.w();
+    H = rect.h();
+    return x != X || y != Y || w != W || h != H;
+}
+
+int GL_GraphicsDriver::not_clipped(int x, int y, int w, int h)
+{
+    // Return 1 if part of the rect is not clipped.
+    // (Return 0 if rect is entirely outside of the clipping region)
+    LOG("()");
+    return regionStack.top().intersects(fltk3::Rectangle(x, y, w, h));
+}
+
+
 void GL_GraphicsDriver::restore_clip() {
-    LOG_UNIMPLEMENTED("()");
+    glScissor(regionStack.top().x(), regionStack.top().y(), regionStack.top().w(), regionStack.top().h());
+    LOG("()");
 }
 
 
@@ -770,8 +807,7 @@ int GL_GraphicsDriver::descent() {
 // ****************************************************************************
 
 char GL_GraphicsDriver::can_do_alpha_blending() {
-    LOG_UNIMPLEMENTED("()");
+    LOG("()");
     return 1;
-    // return 0;
 }
 
