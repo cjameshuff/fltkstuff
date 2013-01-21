@@ -15,6 +15,7 @@
 #include <fltk3gl/gl.h>
 #include <fltk3/Box.h>
 
+#include "OGL_Window.h"
 #include "GL_GraphicsDriver.h"
 #include "pixfmt.h"
 
@@ -97,33 +98,24 @@ class Sketch: public flu::Widget {
     void draw() {if(drawFn) drawFn();}
 };
 
-class GLView: public flu::FLU<fltk3::GLWindow> {
+class GLView: public flu::FLU<OGL_Window> {
   public:
     GLView(int wx, int wy, int ww, int wh, const char * label = nullptr);
     
     void InitGL();
     void draw();
-    
-    void resize(int wx, int wy, int ww, int wh) {
-        flu::FLU<fltk3::GLWindow>::resize(wx, wy, ww, wh);
-        glViewport(0, 0, w(), h());
-        redraw();
-    }
 };
 
 GLView::GLView(int wx, int wy, int ww, int wh, const char * label):
-    flu::FLU<fltk3::GLWindow>(wx, wy, ww, wh, label)
+    flu::FLU<OGL_Window>(wx, wy, ww, wh, label)
 {
     CustomGL_Visual(this);
-    // Needs a kick after the mode change to display properly
-    hide();
-    show();
 }
+
 
 void GLView::InitGL()
 {
     glViewport(0, 0, w(), h());
-    
     
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

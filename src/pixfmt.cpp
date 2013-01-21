@@ -44,19 +44,19 @@ static int glVisualDesc[64] = {
 };
 #endif
 
-void CustomGL_Visual(fltk3::GLWindow * wind)
+void CustomGL_Visual(OGL_Window * wind)
 {
-#if defined(WIN32)
     uint32_t m = fltk3::DOUBLE | fltk3::RGB8 | fltk3::ALPHA | fltk3::DEPTH | fltk3::MULTISAMPLE;
+#if defined(WIN32)
     if(wind)
-        wind->mode(m);
+        wind->init_mode(m, NULL);
     else
         fltk3::gl_visual(m);
 #else
     if(wind)
-        wind->mode(glVisualDesc);
+        wind->init_mode(m, glVisualDesc);
     else
-        fltk3::gl_visual(0, glVisualDesc);
+        fltk3::gl_visual(m, glVisualDesc);
 #endif
 }
 
